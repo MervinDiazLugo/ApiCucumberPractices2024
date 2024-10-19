@@ -1,5 +1,6 @@
 package config.api;
 
+import io.cucumber.datatable.DataTable;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.response.ResponseBody;
@@ -11,6 +12,7 @@ import org.testng.SkipException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -133,6 +135,33 @@ public class RestAssuredHelper {
             log.info("Test Data updated: " + testData.toString());
         } else {
             log.info("testData data: value was empty");
+        }
+    }
+
+    /**
+     * Create a table with parameters given on feature step.
+     *
+     * @param table is a list with parameters given on step.
+     */
+    public DataTable createDataTable(List<List<String>> table) {
+        DataTable data;
+        data = DataTable.create(table);
+        log.info(data.toString());
+        return data;
+    }
+
+
+    public void getDataFromTable(List<List<String>> table) {
+        DataTable data = createDataTable(table);
+        if (data != null) {
+            data.cells().forEach(value -> {
+                //create variables as columns you have.
+                String key = value.get(0);
+                String val = value.get(1);
+                if (StringUtils.isNotEmpty(key)) {
+                    saveInTestData(key, val);
+                }
+            });
         }
     }
 

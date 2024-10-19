@@ -13,6 +13,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.SkipException;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 
 @Log
 public class RestAssuredExtension extends RestAssuredConfigProperties{
@@ -75,9 +78,56 @@ public class RestAssuredExtension extends RestAssuredConfigProperties{
         return response;
     }
 
+    public ResponseOptions<Response> apiPut(String endpoint, String bodyPath) {
+        endpoint = insertParams(endpoint);
+        try {
+            String body = getFileBody(bodyPath);
+            if (StringUtils.isNotEmpty(body)) {
+                body = insertParams(body);
+            } else {
+                throw new SkipException("Body is Empty");
+            }
+            apiBuilder.setBody(body);
+            log.info(body);
+            RequestSpecification requestToken = RestAssured.given().spec(apiBuilder.build());
+            response = requestToken.put(endpoint);
+            responseBody = response.getBody();
+            jsonPathResponse = response.body().jsonPath();
+
+        } catch (IllegalArgumentException | NullPointerException e) {
+            throw new SkipException("Authentication failed " + e);
+        }
+        return response;
+    }
+
+    public ResponseOptions<Response> apiDelete(String path) {
+        path = insertParams(path);
+        try {
+            RequestSpecification requestToken = RestAssured.given().spec(apiBuilder.build());
+            response = requestToken.delete(path);
+            responseBody = response.getBody();
+            jsonPathResponse = response.body().jsonPath();
+
+        } catch (IllegalArgumentException | NullPointerException e) {
+            throw new SkipException("Api delete failed " + e);
+        }
+        return response;
+    }
+
     public void assertStatusCode(int code){
         Assert.assertTrue(response.statusCode() == code,
                 String.format("Status code in response is %s but expected is %s",
                         String.valueOf(response.statusCode()), code));
     }
+
+    public void assertKeyMessages(String key, String value){
+        String val = insertParams(value);
+        String responseValue = retrieveJsonPathResponse(key);
+        Assert.assertTrue(
+                StringUtils.equals(responseValue, val),
+                String.format(
+                        "Values does not match, response is %s and expected is %s", val, responseValue));
+    }
+
+
 }
