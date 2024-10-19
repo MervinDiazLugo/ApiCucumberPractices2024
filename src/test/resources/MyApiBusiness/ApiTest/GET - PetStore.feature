@@ -1,5 +1,5 @@
 @ApiTesting @integration_api
-Feature: Pets
+Feature: Gets Methods Pets
 
   Scenario: Get pet By Status available
     Given I do a GET in /pet/findByStatus?status=available

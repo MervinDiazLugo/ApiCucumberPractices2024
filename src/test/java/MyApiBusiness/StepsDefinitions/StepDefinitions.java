@@ -39,4 +39,15 @@ public class StepDefinitions extends RestAssuredExtension {
     public void iValidateStatusCodeIs(String code) {
         assertStatusCode(Integer.parseInt(code));
     }
+
+    @Given("^I do a POST in (.*?) using body (.*?)$")
+    public void iDoAPost(String endpoint, String bodyPath) {
+        apiPost(endpoint, bodyPath);
+    }
+
+    @Then("^I save the response key (.*?) as (.*?)$")
+    public void iSaveTheResponseKeys(String responseKey, String newKey) {
+        saveInTestData(newKey, retrieveJsonPathResponse(responseKey));
+        //saveInTestData(newKey, retrieveResponse(responseKey));
+    }
 }

@@ -1,16 +1,26 @@
 package config.api;
 
+import io.restassured.path.json.JsonPath;
+import io.restassured.response.Response;
+import io.restassured.response.ResponseBody;
+import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
 import org.testng.SkipException;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Log
 public class RestAssuredHelper {
     public static JSONObject testData = new JSONObject();
+
+    public JsonPath jsonPathResponse;
+    public ResponseBody responseBody;
+    public Response response;
 
     public RestAssuredHelper(){
         testData.put("username", "admin");
@@ -26,7 +36,7 @@ public class RestAssuredHelper {
         String bodyPath;
         try {
             bodyPath = new String(Files.readAllBytes(Paths.get(getCurrentPath()
-                    +"/src/test/resources/body/" + file)));
+                    +"/src/test/resources/" + file)));
         } catch (Exception e) {
             throw new SkipException("check configProperties or path variable " + e.getMessage());
         }
@@ -79,6 +89,51 @@ public class RestAssuredHelper {
             stringData = stringbuffer.toString();
         }
         return stringData;
+    }
+
+    public String retrieveResponse(String key) {
+        String value = "";
+        ArrayList<String> arrayValue = new ArrayList<>();
+        String classType = response.getBody().path(key).toString();
+        if (response != null && response.getBody() != null) {
+            if (response.getBody().path(key) != null) {
+                if ("class java.util.ArrayList".equals(classType)) {
+                    arrayValue = response.getBody().path(key);
+                    value = StringUtils.equals(arrayValue.toString(), "[]") ? "" : arrayValue.toString();
+                } else {
+                    value = response.getBody().path(key).toString();
+                }
+            } else {
+                throw new SkipException("Selected path didn't exist ");
+            }
+        } else {
+            throw new SkipException("Response is null or empty");
+        }
+
+        return value;
+    }
+
+    public String retrieveJsonPathResponse(String key) {
+        String value = "";
+        if (jsonPathResponse != null && StringUtils.isNotEmpty(jsonPathResponse.get(key).toString())) {
+            value = jsonPathResponse.get(key).toString();
+        } else {
+            throw new SkipException("Response is null or empty");
+        }
+        return value;
+    }
+
+    public void saveInTestData(String key, String value) {
+        if (StringUtils.isNotEmpty(key)) {
+            if (testData.containsKey(key)) {
+                testData.replace(key, value);
+            } else {
+                testData.put(key, value);
+            }
+            log.info("Test Data updated: " + testData.toString());
+        } else {
+            log.info("testData data: value was empty");
+        }
     }
 
     public JSONObject setCredentials(){
