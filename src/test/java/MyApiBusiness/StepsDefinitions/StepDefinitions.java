@@ -67,4 +67,9 @@ public class StepDefinitions extends RestAssuredExtension {
     public void iAssertEntityMessageIs(String key, String value) {
         assertKeyMessages(key, value);
     }
+
+    @And("^I assert Response values$")
+    public void iAssertResponseValues(List<List<String>> table) {
+        assertResponseFromTable(table);
+    }
 }

@@ -1,5 +1,6 @@
 package config.api;
 
+import io.cucumber.datatable.DataTable;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
@@ -15,6 +16,7 @@ import org.testng.SkipException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 
 @Log
@@ -123,10 +125,37 @@ public class RestAssuredExtension extends RestAssuredConfigProperties{
     public void assertKeyMessages(String key, String value){
         String val = insertParams(value);
         String responseValue = retrieveJsonPathResponse(key);
-        Assert.assertTrue(
-                StringUtils.equals(responseValue, val),
-                String.format(
-                        "Values does not match, response is %s and expected is %s", val, responseValue));
+
+        if(StringUtils.equals(val, "NOT NULL")){
+            Assert.assertTrue(
+                    StringUtils.isNotEmpty(responseValue),
+                    String.format(
+                            "NOT NULL: response is %s and expected is %s", val, responseValue));
+        }else if(StringUtils.equals(val, "IS A NUMBER")){
+            Assert.assertTrue(
+                    StringUtils.isNumeric(responseValue),
+                    String.format(
+                            "IS A NUMBER: response is %s and expected is %s", val, responseValue));
+        }else{
+            Assert.assertTrue(
+                    StringUtils.equals(responseValue, val),
+                    String.format(
+                            "Values does not match, response is %s and expected is %s", val, responseValue));
+        }
+    }
+
+    public void assertResponseFromTable(List<List<String>> table) {
+        DataTable data = createDataTable(table);
+        if (data != null) {
+            data.cells().forEach(value -> {
+                //create variables as columns you have.
+                String key = value.get(0);
+                String val = value.get(1);
+                if (StringUtils.isNotEmpty(key)) {
+                    assertKeyMessages(key, val);
+                }
+            });
+        }
     }
 
 

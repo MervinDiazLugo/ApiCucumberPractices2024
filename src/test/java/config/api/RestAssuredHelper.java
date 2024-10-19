@@ -150,7 +150,6 @@ public class RestAssuredHelper {
         return data;
     }
 
-
     public void getDataFromTable(List<List<String>> table) {
         DataTable data = createDataTable(table);
         if (data != null) {
@@ -172,4 +171,5 @@ public class RestAssuredHelper {
 
         return credentials;
     }
+
 }
