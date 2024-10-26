@@ -4,9 +4,7 @@ import io.cucumber.datatable.DataTable;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
-import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
-import io.restassured.response.ResponseBody;
 import io.restassured.response.ResponseOptions;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.java.Log;
@@ -14,8 +12,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.SkipException;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 
 
@@ -25,6 +21,11 @@ public class RestAssuredExtension extends RestAssuredConfigProperties{
     String apiVersion = "";
     String apiUri  = "";
     RequestSpecBuilder apiBuilder = new RequestSpecBuilder();
+    public String authEndpoint = getAuthenticationEndpoint();
+    static ResponseOptions<Response> authToken;
+
+    public boolean isAlreadyAuthenticated;
+
 
 
     public RestAssuredExtension() {
@@ -33,11 +34,46 @@ public class RestAssuredExtension extends RestAssuredConfigProperties{
                 ? getBaseUri().concat(apiVersion)
                 : getBaseUri();
         try {
+            authentication();
             apiBuilder.setBaseUri(apiUri);
             apiBuilder.setContentType(ContentType.JSON);
             apiBuilder.setAccept("*/*");
         } catch (IllegalArgumentException e) {
             log.info("Base URI cannot be null, check configProperties");
+        }
+    }
+
+    /**
+     * get response from GraphQL Api
+     *
+     * @return Api responses
+     */
+    public ResponseOptions<Response> authentication() {
+        RequestSpecBuilder authBuilder = new RequestSpecBuilder();
+        authBuilder.setBaseUri(apiUri);
+        authEndpoint = getAuthenticationEndpoint();
+        if (!isAlreadyAuthenticated) {
+            if(StringUtils.contains(apiUri, "petstore.swagger.io")){
+                apiBuilder.addHeader("api_key", "special-key");
+                isAlreadyAuthenticated = true;
+            }else{
+                postAuth(authBuilder);
+            }
+        }
+        return authToken;
+    }
+
+    private void postAuth(RequestSpecBuilder authBuilder){
+        try {
+            RequestSpecification requestToken = RestAssured.given().spec(authBuilder.build());
+            authToken = requestToken.post(authEndpoint);
+            if (authToken.getStatusCode() != 200) {
+                throw new SkipException("Authentication failed " + authToken.getStatusCode());
+            }else{
+                isAlreadyAuthenticated = true;
+            }
+        } catch (IllegalArgumentException | NullPointerException e) {
+            throw new SkipException("Authentication failed " + e.getMessage());
         }
     }
 
@@ -102,11 +138,11 @@ public class RestAssuredExtension extends RestAssuredConfigProperties{
         return response;
     }
 
-    public ResponseOptions<Response> apiDelete(String path) {
-        path = insertParams(path);
+    public ResponseOptions<Response> apiDelete(String endpoint) {
+        endpoint = insertParams(endpoint);
         try {
             RequestSpecification requestToken = RestAssured.given().spec(apiBuilder.build());
-            response = requestToken.delete(path);
+            response = requestToken.delete(endpoint);
             responseBody = response.getBody();
             jsonPathResponse = response.body().jsonPath();
 
