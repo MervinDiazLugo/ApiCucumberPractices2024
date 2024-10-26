@@ -21,7 +21,7 @@ public class RestAssuredExtension extends RestAssuredConfigProperties{
     String apiVersion = "";
     String apiUri  = "";
     RequestSpecBuilder apiBuilder = new RequestSpecBuilder();
-    public String authEndpoint = getAuthenticationEndpoint();
+    public String authEndpoint;
     static ResponseOptions<Response> authToken;
 
     public boolean isAlreadyAuthenticated;
@@ -45,10 +45,8 @@ public class RestAssuredExtension extends RestAssuredConfigProperties{
 
     /**
      * get response from GraphQL Api
-     *
-     * @return Api responses
      */
-    public ResponseOptions<Response> authentication() {
+    public void authentication() {
         RequestSpecBuilder authBuilder = new RequestSpecBuilder();
         authBuilder.setBaseUri(apiUri);
         authEndpoint = getAuthenticationEndpoint();
@@ -56,11 +54,12 @@ public class RestAssuredExtension extends RestAssuredConfigProperties{
             if(StringUtils.contains(apiUri, "petstore.swagger.io")){
                 apiBuilder.addHeader("api_key", "special-key");
                 isAlreadyAuthenticated = true;
+            }else if(StringUtils.contains(apiUri, "restful-booker.herokuapp.com")){
+                bookerAuth(authBuilder);
             }else{
                 postAuth(authBuilder);
             }
         }
-        return authToken;
     }
 
     private void postAuth(RequestSpecBuilder authBuilder){
@@ -74,6 +73,24 @@ public class RestAssuredExtension extends RestAssuredConfigProperties{
             }
         } catch (IllegalArgumentException | NullPointerException e) {
             throw new SkipException("Authentication failed " + e.getMessage());
+        }
+    }
+
+    private void bookerAuth(RequestSpecBuilder authBuilder){
+        try {
+            authBuilder.addHeader("Content-Type", "application/json");
+            String body = getFileBody("Booker/credentials.json");
+            body = insertParams(body);
+            authBuilder.setBody(body);
+            RequestSpecification requestToken = RestAssured.given().spec(authBuilder.build());
+            authToken = requestToken.post(authEndpoint);
+            if (authToken.getStatusCode() != 200) {
+                throw new SkipException("Authentication failed " + authToken.getStatusCode());
+            }else{
+                isAlreadyAuthenticated = true;
+            }
+        } catch (IllegalArgumentException | NullPointerException e) {
+            throw new SkipException("Booker Authentication failed " + e.getMessage());
         }
     }
 

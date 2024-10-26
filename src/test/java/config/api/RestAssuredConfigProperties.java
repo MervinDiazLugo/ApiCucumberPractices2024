@@ -168,9 +168,20 @@ public class RestAssuredConfigProperties extends RestAssuredHelper{
         return API_PASSWORD;
     }
 
-    public static String getAuthenticationEndpoint() {
+    public String getAuthenticationEndpoint() {
+        String authEndpointProperty = String.format("api.%s.authenticationEndpoint.%s",
+                getEnvironment(), getClient());
+
+        API_AUTH_ENDPOINT = prop.getProperty(authEndpointProperty) != null
+                ? prop.getProperty(authEndpointProperty) : null;
+
+        if (StringUtils.isEmpty(API_AUTH_ENDPOINT)) {
+            Assert.assertTrue(StringUtils.isNotEmpty(API_AUTH_ENDPOINT), "API_AUTH_ENDPOINT base malformation");
+        }
+
         return API_AUTH_ENDPOINT;
     }
+
 
     public static String getBodyData() {
         return API_BODY_DATA;
