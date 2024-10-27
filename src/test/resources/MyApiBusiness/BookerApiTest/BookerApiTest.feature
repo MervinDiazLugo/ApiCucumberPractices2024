@@ -9,6 +9,7 @@ Feature: Gets Methods Booker
   Scenario: POST - Create a new book
     Given I do a POST in /booking using body /BodyBooker/CreateBooking.json
     Then I print the api Response
+    Then I validate the Response Schema using body /BodyBooker/schemas/CreateBookingSchema.json
     And I assert Response values
       | bookingid                   | NOT NULL           |
       | booking.firstname           | Tom Sawyer         |

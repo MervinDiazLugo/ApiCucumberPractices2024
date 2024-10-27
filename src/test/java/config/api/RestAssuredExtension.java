@@ -1,5 +1,8 @@
 package config.api;
 
+import com.github.fge.jsonschema.SchemaVersion;
+import com.github.fge.jsonschema.cfg.ValidationConfiguration;
+import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import io.cucumber.datatable.DataTable;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
@@ -12,6 +15,8 @@ import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.SkipException;
+
+import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchema;
 
 @Log
 public class RestAssuredExtension extends RestAssuredConfigProperties {
@@ -220,5 +225,21 @@ public class RestAssuredExtension extends RestAssuredConfigProperties {
                 }
               });
     }
+  }
+
+  public void assertJsonSchemaValidation(String schemaFile){
+    response.then().assertThat()
+            .body(matchesJsonSchema(getFileBody(schemaFile))
+                    .using(jsonSchemaFactory()));
+  }
+
+  public JsonSchemaFactory jsonSchemaFactory(){
+    JsonSchemaFactory jsonSchemaFactory = JsonSchemaFactory.newBuilder()
+            .setValidationConfiguration(
+                    ValidationConfiguration.newBuilder()
+                            .setDefaultVersion(SchemaVersion.DRAFTV4).freeze())
+            .freeze();
+
+    return jsonSchemaFactory;
   }
 }

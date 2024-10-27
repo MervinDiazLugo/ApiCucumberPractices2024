@@ -45,20 +45,6 @@ public class RestAssuredHelper {
     return bodyPath;
   }
 
-  public String getSchemaBody(String file) {
-    String bodyPath;
-    try {
-      bodyPath =
-          new String(
-              Files.readAllBytes(
-                  Paths.get(getCurrentPath() + "/src/test/resources/schemas/" + file)));
-    } catch (Exception e) {
-      throw new SkipException("check configProperties or path variable " + e.getMessage());
-    }
-
-    return bodyPath;
-  }
-
   public String getCurrentPath() {
     return Paths.get("").toAbsolutePath().toString();
   }

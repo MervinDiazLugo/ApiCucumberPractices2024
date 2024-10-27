@@ -70,4 +70,9 @@ public class StepDefinitions extends RestAssuredExtension {
   public void iAssertResponseValues(List<List<String>> table) {
     assertResponseFromTable(table);
   }
+
+  @Then("^I validate the Response Schema using body (.*?)$")
+  public void iValidateTheResponseSchema(String schemaFile) {
+    assertJsonSchemaValidation(schemaFile);
+  }
 }
