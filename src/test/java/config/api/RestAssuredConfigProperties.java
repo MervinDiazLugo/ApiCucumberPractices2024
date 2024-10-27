@@ -185,4 +185,19 @@ public class RestAssuredConfigProperties extends RestAssuredHelper {
   public static String getBodyData() {
     return API_BODY_DATA;
   }
+
+  public static String setTestNgEnvironment(String value) {
+    API_TESTNG_ENVIRONMENT = value;
+    return API_TESTNG_ENVIRONMENT;
+  }
+
+  public static String setTestNgClient(String value) {
+    API_TESTNG_CLIENT = value;
+    return API_TESTNG_CLIENT;
+  }
+
+  public static String setTestNgVersion(String value) {
+    API_TESTNG_VERSION = value;
+    return API_TESTNG_VERSION;
+  }
 }
