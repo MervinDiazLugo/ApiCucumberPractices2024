@@ -50,17 +50,17 @@ public class RestAssuredExtension extends RestAssuredConfigProperties{
         RequestSpecBuilder authBuilder = new RequestSpecBuilder();
         authBuilder.setBaseUri(apiUri);
         authEndpoint = getAuthenticationEndpoint();
-        isAlreadyAuthenticated = setBearerToken();
-        if (!isAlreadyAuthenticated) {
-            if(StringUtils.contains(apiUri, "petstore.swagger.io")){
-                apiBuilder.addHeader("api_key", "special-key");
-                isAlreadyAuthenticated = true;
-            }else if(StringUtils.contains(apiUri, "restful-booker.herokuapp.com")){
-                bookerAuth(authBuilder);
-            }else{
-                postAuth(authBuilder);
-            }
+
+        if(StringUtils.contains(apiUri, "petstore.swagger.io")){
+            apiBuilder.addHeader("api_key", "special-key");
+            isAlreadyAuthenticated = true;
+        }else if(StringUtils.contains(apiUri, "restful-booker.herokuapp.com")){
+            isAlreadyAuthenticated = setBearerToken();
+            if(!isAlreadyAuthenticated){bookerAuth(authBuilder);}
+        }else{
+            postAuth(authBuilder);
         }
+
     }
 
     private void postAuth(RequestSpecBuilder authBuilder){
