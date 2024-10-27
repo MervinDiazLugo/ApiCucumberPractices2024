@@ -22,7 +22,7 @@ public class RestAssuredExtension extends RestAssuredConfigProperties{
     String apiUri  = "";
     RequestSpecBuilder apiBuilder = new RequestSpecBuilder();
     public String authEndpoint;
-    static ResponseOptions<Response> authToken;
+    Response authToken;
 
     public boolean isAlreadyAuthenticated;
 
@@ -37,7 +37,7 @@ public class RestAssuredExtension extends RestAssuredConfigProperties{
             authentication();
             apiBuilder.setBaseUri(apiUri);
             apiBuilder.setContentType(ContentType.JSON);
-            apiBuilder.setAccept("*/*");
+            apiBuilder.setAccept("application/json");
         } catch (IllegalArgumentException e) {
             log.info("Base URI cannot be null, check configProperties");
         }
@@ -50,6 +50,7 @@ public class RestAssuredExtension extends RestAssuredConfigProperties{
         RequestSpecBuilder authBuilder = new RequestSpecBuilder();
         authBuilder.setBaseUri(apiUri);
         authEndpoint = getAuthenticationEndpoint();
+        isAlreadyAuthenticated = setBearerToken();
         if (!isAlreadyAuthenticated) {
             if(StringUtils.contains(apiUri, "petstore.swagger.io")){
                 apiBuilder.addHeader("api_key", "special-key");
@@ -79,7 +80,8 @@ public class RestAssuredExtension extends RestAssuredConfigProperties{
     private void bookerAuth(RequestSpecBuilder authBuilder){
         try {
             authBuilder.addHeader("Content-Type", "application/json");
-            String body = getFileBody("Booker/credentials.json");
+            authBuilder.addHeader("Accept", "application/json");
+            String body = getFileBody("BodyBooker/credentials.json");
             body = insertParams(body);
             authBuilder.setBody(body);
             RequestSpecification requestToken = RestAssured.given().spec(authBuilder.build());
@@ -87,13 +89,28 @@ public class RestAssuredExtension extends RestAssuredConfigProperties{
             if (authToken.getStatusCode() != 200) {
                 throw new SkipException("Authentication failed " + authToken.getStatusCode());
             }else{
-                isAlreadyAuthenticated = true;
+                String token = StringUtils.isNotEmpty(authToken.getBody().jsonPath().get("token"))
+                        ? authToken.getBody().jsonPath().get("token") : null;
+                if(StringUtils.isNotEmpty(token)){
+                    saveInTestData("token", token);
+                    setBearerToken();
+                }
             }
         } catch (IllegalArgumentException | NullPointerException e) {
             throw new SkipException("Booker Authentication failed " + e.getMessage());
         }
     }
 
+    public boolean setBearerToken() {
+        String token = testData.containsKey("token") ? testData.get("token").toString() : null;
+        boolean isAlreadyAuthenticated = StringUtils.isNotEmpty(token);
+        if(isAlreadyAuthenticated){
+            apiBuilder.addHeader("Cookie",
+                    String.format("token=%s", token));
+
+        }
+        return isAlreadyAuthenticated;
+    }
 
     public ResponseOptions<Response> apiGet(String endpoint) {
         endpoint = insertParams(endpoint);

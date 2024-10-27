@@ -2,7 +2,7 @@
 Feature: Post Methods Pets
 
   Scenario: POST - Create a new Pet
-    Given I do a POST in /pet using body /BodyPetStore/bodies/Post_Pet.json
+    Given I do a POST in /pet using body /BodyPetStore/Post_Pet.json
     Then I print the api Response
     And I assert Response values
       | id            | NOT NULL    |
@@ -16,7 +16,7 @@ Feature: Post Methods Pets
     And I validate status code is 200
 
   Scenario: PUT - Change pet data
-    Given I do a PUT in /pet using body /BodyPetStore/bodies/Put_Pet.json
+    Given I do a PUT in /pet using body /BodyPetStore/Put_Pet.json
       | name           | Little Pony     |
       | customCat      | Mythical horses |
     Then I print the api Response
