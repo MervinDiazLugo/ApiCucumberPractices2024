@@ -1,5 +1,7 @@
 package config.api;
 
+import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchema;
+
 import com.github.fge.jsonschema.SchemaVersion;
 import com.github.fge.jsonschema.cfg.ValidationConfiguration;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
@@ -15,8 +17,6 @@ import lombok.extern.java.Log;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.SkipException;
-
-import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchema;
 
 @Log
 public class RestAssuredExtension extends RestAssuredConfigProperties {
@@ -56,22 +56,6 @@ public class RestAssuredExtension extends RestAssuredConfigProperties {
       if (!isAlreadyAuthenticated) {
         bookerAuth(authBuilder);
       }
-    } else {
-      postAuth(authBuilder);
-    }
-  }
-
-  private void postAuth(RequestSpecBuilder authBuilder) {
-    try {
-      RequestSpecification requestToken = RestAssured.given().spec(authBuilder.build());
-      authToken = requestToken.post(authEndpoint);
-      if (authToken.getStatusCode() != 200) {
-        throw new SkipException("Authentication failed " + authToken.getStatusCode());
-      } else {
-        isAlreadyAuthenticated = true;
-      }
-    } catch (IllegalArgumentException | NullPointerException e) {
-      throw new SkipException("Authentication failed " + e.getMessage());
     }
   }
 
@@ -227,17 +211,20 @@ public class RestAssuredExtension extends RestAssuredConfigProperties {
     }
   }
 
-  public void assertJsonSchemaValidation(String schemaFile){
-    response.then().assertThat()
-            .body(matchesJsonSchema(getFileBody(schemaFile))
-                    .using(jsonSchemaFactory()));
+  public void assertJsonSchemaValidation(String schemaFile) {
+    response
+        .then()
+        .assertThat()
+        .body(matchesJsonSchema(getFileBody(schemaFile)).using(jsonSchemaFactory()));
   }
 
-  public JsonSchemaFactory jsonSchemaFactory(){
-    JsonSchemaFactory jsonSchemaFactory = JsonSchemaFactory.newBuilder()
+  public JsonSchemaFactory jsonSchemaFactory() {
+    JsonSchemaFactory jsonSchemaFactory =
+        JsonSchemaFactory.newBuilder()
             .setValidationConfiguration(
-                    ValidationConfiguration.newBuilder()
-                            .setDefaultVersion(SchemaVersion.DRAFTV4).freeze())
+                ValidationConfiguration.newBuilder()
+                    .setDefaultVersion(SchemaVersion.DRAFTV4)
+                    .freeze())
             .freeze();
 
     return jsonSchemaFactory;
