@@ -10,6 +10,9 @@ Framework para pruebas con Rest Assured/Cucumber en Java y Maven (Udemy 2024)
 #### si no funciona así intenta **`mvn clean test -DsuiteFile=ApiTestPetStoreRunner.xml`**
 
 
+#Booker Test Client
+**`mvn clean test -DsuiteFile='BookerApiTestRunner.xml'`**
+
 
 
 ### [Tools que necesito para instalar y configurar este framework, haz click](https://medium.com/@waynemervin/como-configurar-tu-entorno-para-empezar-a-programar-en-java-a64337863d98)

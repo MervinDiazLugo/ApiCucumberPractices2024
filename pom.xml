@@ -13,7 +13,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.cucumber.reporting.version>5.7.8</maven.cucumber.reporting.version>
         <suiteFile>${defaultSuiteFiles}</suiteFile>
-        <defaultSuiteFiles>ApiTestPetStoreRunnerNoParams.xml,</defaultSuiteFiles>
+        <defaultSuiteFiles>ApiTestPetStoreRunner.xml,</defaultSuiteFiles>
     </properties>
 
     <dependencyManagement>

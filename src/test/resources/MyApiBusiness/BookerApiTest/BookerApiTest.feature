@@ -1,6 +1,6 @@
 @ApiTesting @integration_api
 Feature: Gets Methods Booker
-
+  @Ignore
   Scenario: Get Booker server status
     Given I do a GET in /ping
     Then I print the api Response

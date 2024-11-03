@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Suite">
+
+    <test thread-count="1" name="Test" parallel="tests">
+        <parameter name="api.env" value="TST"/>
+        <parameter name="api.client" value="booker"/>
+        <parameter name="api.version" value=""/>
+        <classes>
+            <class name="MyApiBusiness.runners.api.BookerApiTestRunner"/>
+        </classes>
+    </test>
+</suite>
